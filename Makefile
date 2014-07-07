@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall 
+CFLAGS = -Wall -g
 LDFLAGS = -lSDL -lavformat -lavcodec -lavutil -lswscale -lm -lz -lbz2
 EXEC = webcam
 SRC = $(wildcard *.c)
