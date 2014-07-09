@@ -43,12 +43,13 @@
 #define VERSION_MAJOR   (0)
 #define VERSION_MINOR   (2)
 
-#define OPT_STRING      "hl:o:r:"
+#define OPT_STRING      "hl:o:r:w:"
 static struct option long_options[] = {
     {"help",        no_argument,        NULL,   'h'},
     {"loops",       required_argument,  NULL,   'l'},
     {"output",      required_argument,  NULL,   'o'},
     {"framerate",   required_argument,  NULL,   'r'},
+    {"winid",       required_argument,  NULL,   'w'},
     {0,             0,                  NULL,    0 }
 };
 
@@ -111,6 +112,7 @@ usage(char* name)
     fprintf(stdout, "  -l, --loops <n>       Number of loops (defaults to %d)\n", DEFAULT_LOOPS);
     fprintf(stdout, "  -o, --output <file>   Save output to file\n");
     fprintf(stdout, "  -r, --framerate <n>   Set framerate (defaults to %d)\n", DEFAULT_FRAMERATE);
+    fprintf(stdout, "  -w, --winid <n>       Window ID to draw SDL_Surface on.\n");
     fprintf(stdout, "\n");
 }
 
@@ -270,6 +272,8 @@ main(int argc, char** argv )
     int i=0, end=0, status;
     uint32_t start=0, loop_start=0;
     struct sigaction sig_act;
+    long winid=0;
+    char buffer[64] = "NONE";
     
     AVPacket packet;
     AVFrame *frame=NULL;
@@ -290,7 +294,7 @@ main(int argc, char** argv )
                 return 0;
                 break;
             case 'l':
-                loops = atoi(optarg);
+                loops = atol(optarg);
                 break;
             case 'o':
                 outfile = optarg;
@@ -298,6 +302,10 @@ main(int argc, char** argv )
             case 'r':
                 frameRate = atoi(optarg);
                 sleepTime = 1000000 / frameRate;
+                break;
+            case 'w':
+                winid=atoi(optarg);
+                sprintf(buffer, "0x%lx", winid);
                 break;
             default:
                 break;
@@ -316,6 +324,7 @@ main(int argc, char** argv )
     fprintf(stdout, "loops=%d\n",       loops);
     fprintf(stdout, "sleeptime=%d\n",   sleepTime);
     fprintf(stdout, "URL=%s\n",         url);
+    fprintf(stdout, "winid=%s\n", buffer);
 
     
     // --------------------- Install signal handlers ----------------
@@ -369,6 +378,13 @@ main(int argc, char** argv )
 
 
     // --------------------- Configure SDL --------------------------
+    // Embedded window
+    if( winid ) {
+        sprintf(buffer, "SDL_WINDOWID=0x%lx", winid);
+        SDL_putenv(buffer);
+    }
+
+    // SDL init
     if( SDL_Init(SDL_INIT_VIDEO)==-1 ) {
         fprintf(stderr, "Cannot init SDL.\n");
         exit(-1);
