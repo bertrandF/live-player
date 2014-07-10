@@ -494,7 +494,7 @@ main(int argc, char** argv )
             fflush(stdout);
     
             // Regulate FPS
-            if(1000.0/frameRate > SDL_GetTicks()-start) {
+            if(1000.0/frameRate > SDL_GetTicks()-loop_start) {
                 SDL_Delay(1000.0/frameRate - (SDL_GetTicks()-loop_start));
             }
         }
